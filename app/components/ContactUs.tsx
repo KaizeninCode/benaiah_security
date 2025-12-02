@@ -3,14 +3,14 @@ import Button from "./Button";
 
 const ContactUs = () => {
   return (
-    <section id="contact" className="lg:px-16 lg:py-4 p-8">
+    <section id="contact" className="lg:px-16 lg:py-4 p-8 lg:mb-8">
       <div className="grid md:grid-cols-2 gap-8 w-full ">
         <div className="flex-col lg:py-18 flex items-start justify-between">
           <h1 className="text-4xl font-semibold">Contact Us</h1>
           <p className="text-lg my-4">Our team would love to hear from you.</p>
           <form
             action=""
-            className="rounded-md shadow-sm shadow-slate-500 space-y-6 p-6 w-4/5"
+            className="rounded-md shadow-sm shadow-slate-500 space-y-6 p-6 w-4/5 max-md:mx-auto"
           >
             <div className="flex justify-between items-center gap-8">
               <div className="flex flex-col items-start justify-center gap-1 w-1/2">
