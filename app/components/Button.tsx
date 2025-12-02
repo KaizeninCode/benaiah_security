@@ -3,6 +3,7 @@ import React from 'react'
 type ButtonProps = {
     title: string;
     className?: string;
+    onClick?: ()=>void;
 
 }
 
