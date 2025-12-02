@@ -22,7 +22,7 @@ const Header = () => {
         },
     ]
   return (
-<header className='flex items-center justify-around p-3'>
+<header className='flex items-center justify-between mx-16 py-3'>
     <div>Lorem ipsum dolor sit amet.</div>
     <nav >
         <div className="flex items-center justify-between gap-12">

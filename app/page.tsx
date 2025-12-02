@@ -1,11 +1,11 @@
 import React from 'react'
+import Hero from './components/Hero'
 
 const HomePage = () => {
   return (
-    <div className='font-bold text-center'>
-      HomePage
-    </div>
-  )
+   <main>
+    <Hero/>
+   </main>  )
 }
 
 export default HomePage
