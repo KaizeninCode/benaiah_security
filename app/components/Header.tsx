@@ -114,7 +114,7 @@ const Header = () => {
         </div>
       </nav>
       <div className="space-x-8 max-md:hidden">
-        <Button className="bg-gray-300 hover:text-white"title="Log In" />
+        <Button className="bg-green-200 hover:text-white"title="Log In" />
         {/* <Button className="bg-green-300 hover:bg-green-700 text-black" /> */}
         <Button className="bg-red-500 text-white hover:text-black" title="Sign Up" />
       </div>

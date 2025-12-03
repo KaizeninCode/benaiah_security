@@ -27,7 +27,7 @@ const BookNow = () => {
   ];
   return (
     <section className="lg:px-16 lg:py-4 p-8">
-      <div className="gap-8 w-full lg:border-b lg:border-b-red-500 lg:pb-20">
+      <div className="gap-8 w-full lg:border-b lg:border-b-white lg:pb-20">
         <div className="lg:w-3/5 flex flex-col items-start justify-between">
           <span className="text-red-500 mb-4">Features</span>
           <h1 className="text-4xl font-semibold mb-4">Book Now</h1>
@@ -52,7 +52,7 @@ const BookNow = () => {
             </div>
           ))}
         </div>
-        <div className="border-b border-red-500 mt-16 w-4/5 mx-auto md:hidden" />
+        <div className="border-t mt-16 w-4/5 mx-auto md:hidden" />
       </div>
     </section>
   );
