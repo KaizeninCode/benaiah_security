@@ -3,6 +3,7 @@ import Hero from './components/Hero'
 import AboutUs from './components/AboutUs'
 import BookNow from './components/BookNow'
 import ContactUs from './components/ContactUs'
+import Pricing from './components/Pricing'
 
 const HomePage = () => {
   return (
@@ -10,6 +11,7 @@ const HomePage = () => {
     <Hero/>
     <AboutUs/>
     <BookNow/>
+    <Pricing/>
     <ContactUs/>
    </main>  )
 }

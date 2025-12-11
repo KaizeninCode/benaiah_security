@@ -69,7 +69,9 @@ const ContactUs = () => {
                 placeholder="Leave us a message..."
               />
             </div>
-            <div className="w-fit mx-auto"><Button title="Submit Message"/></div>
+            <div className="bg-red-500 rounded-md w-fit mx-auto">
+              <Button title="Submit Message" />
+            </div>
           </form>
         </div>
         <div className='bg-[url("/contact.png")] bg-cover bg-center rounded-lg shadow-lg shadow-gray-500' />

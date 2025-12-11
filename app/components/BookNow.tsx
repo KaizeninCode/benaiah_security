@@ -31,7 +31,7 @@ const BookNow = () => {
         <div className="lg:w-3/5 flex flex-col items-start justify-between">
           <span className="text-red-500 mb-4">Features</span>
           <h1 className="text-4xl font-semibold mb-4">Book Now</h1>
-          <p className="text-xl">
+          <p className="text-lg">
             Take the first step toward a safer environment. Our team of trained
             guards, certified security technicians, and expert risk assessors
             are ready to help secure your home, office, or property. Book now
@@ -44,7 +44,7 @@ const BookNow = () => {
             <div className="rounded-lg bg-slate-100 p-4" key={index}>
                 <div className="mb-10 p-3 text-2xl bg-red-500 w-fit rounded-xl text-white">{feature.icon}</div>
               <h3 className="text-2xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-lg">{feature.description}</p>
+              <p className="text-l">{feature.description}</p>
               <div className="text-red-500 gap-2 w-1/3 mt-4 flex items-start justify-center mx-auto cursor-pointer">
                 <h4>Learn more</h4>
                 <span>&rarr;</span>

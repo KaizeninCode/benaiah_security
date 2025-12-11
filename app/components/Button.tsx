@@ -13,7 +13,7 @@ const Button = ({title, className}: ButtonProps) => {
 
     <button
   className={`
-    px-3 py-2 hover:bg-red-300 hover:border-red-600 transition duration-500 ease-in-out rounded-md cursor-pointer ${className}`} >
+    px-3 py-2 hover:bg-gray-200 hover:border-red-600 transition duration-500 ease-in-out rounded-md cursor-pointer ${className}`} >
   {title}
 </button>
 

@@ -114,10 +114,10 @@ const Header = () => {
         </div>
       </nav>
       <div className="space-x-8 max-md:hidden">
-        <Button className="bg-green-200 hover:text-white"title="Log In" />
+        <Button className="hover:bg-gray-200 transition duration-300 hover:text-black px-2 py-2 rounded-md" title="Log In" />
         {/* <Button className="bg-green-300 hover:bg-green-700 text-black" /> */}
         <Button className="bg-red-500 text-white border border-red-600
-               hover:bg-white transition duration-300 px-4 py-2 rounded-md hover:text-black"title="Sign Up" />
+               hover:bg-white transition duration-300 px-3 py-2 rounded-md hover:text-black"title="Sign Up" />
       </div>
     </header>
   );
