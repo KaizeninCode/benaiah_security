@@ -45,7 +45,8 @@ const loginUser = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-  const { email, phone, password, username } = req.body;
+  const { email, phone, password, username, role } = req.body;
+  const currentUserRole = req.user?.role;
 
   try {
     // Check if user exists by email or phone or username
@@ -57,18 +58,51 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const role = 'visitor' // default role
     user = new User({
       email,
       password,
       phone,
       username,
-      role,
-      permissions: rolePermissions[role] || rolePermissions["visitor"], // default to visitor permissions
+      role: assignedRole,
+      permissions: rolePermissions[assignedRole] || rolePermissions["visitor"], // default to visitor permissions
     });
 
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
+  } catch (e) {
+    console.log(e.message);
+    res.status(500).send("Error registering user.");
+  }
+};
+
+const registerUserAdmin = async (req, res) => {
+  const { email, phone, password, username, role } = req.body;
+  // Require admin authentication
+  if (!req.user || req.user.role !== "admin") {
+    return res
+      .status(403)
+      .json({
+        message: "Forbidden: Only admins can create users with custom roles.",
+      });
+  }
+  try {
+    let user = await User.findOne({
+      $or: [{ email }, { phone }, { username }],
+    });
+    if (user) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+    const assignedRole = role || "visitor";
+    user = new User({
+      email,
+      password,
+      phone,
+      username,
+      role: assignedRole,
+      permissions: rolePermissions[assignedRole] || rolePermissions["visitor"],
+    });
+    await user.save();
+    res.status(201).json({ message: "User registered successfully (admin)" });
   } catch (e) {
     console.log(e.message);
     res.status(500).send("Error registering user.");
@@ -80,4 +114,4 @@ const logout = async (req, res) => {
   res.json({ message: "User logged out successfully" });
 };
 
-export { loginUser, registerUser, logout };
+export { loginUser, registerUser, registerUserAdmin, logout };

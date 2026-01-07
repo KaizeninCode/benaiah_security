@@ -1,6 +1,11 @@
 // routes/auth.js
 import express from "express";
-import { loginUser, registerUser } from "../controllers/authController.js";
+import {
+  loginUser,
+  registerUser,
+  registerUserAdmin,
+} from "../controllers/authController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -77,5 +82,39 @@ router.post("/login", loginUser);
  *         description: User already exists
  */
 router.post("/register", registerUser);
+/**
+ * @swagger
+ * /auth/admin/register:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Register a new admin
+ *     description: Creates a new admin account with email, phone, username, and password. Protected by authentication middleware.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: admin@example.com
+ *               phone:
+ *                 type: number
+ *                 example: 9876543210
+ *               username:
+ *                 type: string
+ *                 example: "newadmin"
+ *               password:
+ *                 type: string
+ *                 example: "yourpassword"
+ *     responses:
+ *       201:
+ *         description: Admin registered successfully
+ *       400:
+ *         description: Admin already exists
+ */
+router.post("/admin/register", authMiddleware, registerUserAdmin);
 
 export default router;
