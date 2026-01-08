@@ -13,9 +13,9 @@ const loginUser = async (req, res) => {
   try {
     let user = null;
     if (email) {
-      user = await User.findOne({ email }).select('-password');
+      user = await User.findOne({ email });
     } else if (phone) {
-      user = await User.findOne({ phone }).select('-password');
+      user = await User.findOne({ phone });
     }
 
     if (!user) {
