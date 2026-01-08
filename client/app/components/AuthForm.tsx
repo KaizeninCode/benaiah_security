@@ -9,8 +9,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
+import { useDashboardStore } from "@/store/useDashboardStore";
 
 export default function AuthForm({ type }: { type: "login" | "register" }) {
+  const setUser = useDashboardStore((state) => state.setUser);
+  const setToken = useDashboardStore((state) => state.setToken);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -25,7 +28,7 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     // basic validation
     switch (type) {
       case "register":
@@ -39,7 +42,7 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
         }
         break;
       case "login":
-        if (!email || !password ) {
+        if (!email || !password) {
           setError("Email and password are required.");
           return;
         }
@@ -52,16 +55,21 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
     // API call
     switch (type) {
       case "login":
-        response = await fetch(`${process.env.LIVE_BACKEND_URL}/auth/login`, {
+        response = await fetch(`${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
-        if (response.ok) router.push("/dashboard");
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data.username);
+          setToken(data.token);
+          router.push("/dashboard");
+        }
         break;
       case "register":
         response = await fetch(
-          `${process.env.LIVE_BACKEND_URL}/auth/register`,
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/register`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -74,7 +82,6 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
       default:
         break;
     }
-
   };
 
   return (

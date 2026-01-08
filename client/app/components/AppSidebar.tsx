@@ -35,8 +35,11 @@ import {
 } from "lucide-react";
 
 import { usePathname } from "next/navigation";
+import { useDashboardStore } from "@/store/useDashboardStore";
+
 
 export function AppSidebar() {
+  const user = useDashboardStore((state) => state.user);
   const pathname = usePathname()
   // menu items
   const items = [
@@ -118,7 +121,7 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> Username
+                  <User2 /> {user?.name || 'User'}
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>

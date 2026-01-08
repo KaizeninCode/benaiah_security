@@ -8,7 +8,7 @@ type User = {
   phoneNumber: number;
 };
 
-type DashboardStats = {
+export type DashboardStats = {
   totalGuards: number;
   activeGuards: number;
   guardsOnLeave: number;
