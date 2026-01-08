@@ -132,62 +132,6 @@ router.delete(
  *       201:
  *         description: User assigned
  */
-router.post(
-  "/:id/users",
-  authorizePermissions("admin"),
-  sitesController.assignUserToSite
-);
-
-/**
- * @swagger
- * /sites/{id}/users/{userId}:
- *   delete:
- *     tags:
- *       - User Assignments
- *     summary: Remove user from site
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: User removed from site
- */
-router.delete(
-  "/:id/users/:userId",
-  authorizePermissions("admin"),
-  sitesController.removeUserFromSite
-);
-
-/**
- * @swagger
- * /sites/{id}/users:
- *   get:
- *     tags:
- *       - User Assignments
- *     summary: Get all users for a site
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of users for site
- */
-router.get(
-  "/:id/users",
-  authorizePermissions("admin", "manager"),
-  sitesController.getAllUsersForSite
-);
 
 /**
  * @swagger
