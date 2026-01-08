@@ -19,13 +19,13 @@ const loginUser = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(404).json({ message: "User not found." });
     }
 
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "Incorrect password." });
     }
 
     const payload = {
@@ -37,10 +37,10 @@ const loginUser = async (req, res) => {
 
     const token = jsonwebtoken.sign(payload, jwtSecret, { expiresIn: "1h" });
 
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({ message: "Login successful.", user, token });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    res.status(500).send("Server error.");
   }
 };
 
