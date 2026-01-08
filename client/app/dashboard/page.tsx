@@ -72,16 +72,16 @@ export default function Dashboard() {
       }).then((res) => res.json()),
     ]).then(([users, sites, visitors, guards, gates]) => {
       const stats = {
-        totalGuards: guards.length || 0,
-        activeGuards: guards.length || 0, // placeholder
+        totalGuards: guards.total,
+        activeGuards: guards.total, // placeholder
         guardsOnLeave: 0, // placeholder
-        guardsAvailable: guards.length || 0, // placeholder
-        hosts: users.length || 0,
-        totalSites: sites.length || 0,
-        activeSites: sites.length || 0, // placeholder
-        totalGates: gates.length || 0,
-        inactiveGates: 0, // placeholder
-        visitorsThisMonth: visitors.length || 0,
+        guardsAvailable: guards.total, // placeholder
+        hosts: users.total,
+        totalSites: sites.total,
+        activeSites: sites.total, // placeholder
+        totalGates: gates.total,
+        activeGates: gates.gates.filter((g: { status: string; }) => g.status === 'active').length, // placeholder
+        visitorsThisMonth: visitors.total,
       };
       useDashboardStore.getState().setStats(stats);
     });
@@ -89,19 +89,18 @@ export default function Dashboard() {
 
   const statsArray = stats
     ? [
-        { label: "Hosts", value: stats.hosts, icon: IconTrendingUp },
+        { label: "Hosts", value: stats.hosts },
         {
           label: "Total Guards",
           value: stats.totalGuards,
           icon: IconTrendingUp,
         },
-        { label: "Total Sites", value: stats.totalSites, icon: IconTrendingUp },
+        { label: "Total Sites", value: stats.totalSites },
         {
           label: "Visitors This Month",
           value: stats.visitorsThisMonth,
-          icon: IconTrendingDown,
         },
-        // { label: "Total Gates", value: stats.totalGates, icon: IconTrendingUp },
+        // { label: "Total Gates", value: stats.totalGates },
       ]
     : [];
   return (
@@ -156,9 +155,9 @@ export default function Dashboard() {
                 <CardContent className="flex flex-col items-center justify-center py-6">
                   <div className="text-3xl font-bold text-red-500 flex items-center">
                     {stat.value}
-                    <Badge className="bg-red-500 ml-2">
+                    {/* <Badge className="bg-red-500 ml-2">
                       <stat.icon size={8} className="mr-1" />
-                    </Badge>
+                    </Badge> */}
                   </div>
                   <div className="text-md text-slate-600 mt-2 text-center">
                     {stat.label}

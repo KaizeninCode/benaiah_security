@@ -19,59 +19,36 @@ const SitesGatesMetrics = ({ stats }: GuardMetricsProps) => {
     );
   }
 
+  const metrics = [
+    { label: "Total Sites", value: stats.totalSites },
+    { label: "Active Sites", value: stats.activeSites },
+    { label: "Total Gates", value: stats.totalGates },
+    { label: "Active Gates", value: stats.activeGates },
+  ]
+
   return (
     <div className="grid grid-cols-2 gap-4 w-full h-1/4">
       <div className="rounded-lg h-full space-y-4">
-        <Card className="flex  justify-center text-center">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium mb-4">
-              Total Sites
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-5xl font-extrabold text-red-500">
-              {stats.totalSites}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="flex  justify-center text-center">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium mb-4">
-              Active Sites
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-5xl font-extrabold text-red-500">
-              {stats.activeSites}
-            </p>
-          </CardContent>
-        </Card>
+        {metrics.slice(0,2).map((metric, i) => (
+          <Card className="flex justify-center text-center" key={i}>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-500">{metric.value}</div>
+              <div className="text-lg text-slate-800">{metric.label}</div>
+            </CardContent>
+          </Card>
+        ))}
+        
       </div>
       <div className="rounded-lg h-full space-y-4">
-        <Card className="flex  justify-center text-center">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium mb-4">
-              Total Gates
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-5xl font-extrabold text-red-500">
-              {stats.totalGates}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="flex  justify-center text-center">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium mb-4">
-              Inactive Gates
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-5xl font-extrabold text-red-500">
-              {stats.inactiveGates}
-            </p>
-          </CardContent>
-        </Card>
+        {metrics.slice(2,4).map((metric, i) => (
+          <Card className="flex justify-center text-center" key={i}>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-500">{metric.value}</div>
+              <div className="text-lg text-slate-800">{metric.label}</div>
+            </CardContent>
+          </Card>
+        ))}
+        
       </div>
     </div>
   );
