@@ -4,6 +4,7 @@ import userRoutes from './routes/userRoutes.js'
 import visitorRoutes from './routes/visitorRoutes.js'
 import siteRoutes from './routes/siteRoutes.js'
 import guardRoutes from './routes/guardRoutes.js'
+import gateRoutes from './routes/gateRoutes.js'
 import guardAssignmentRoutes from './routes/guardAssignmentRoutes.js'
 import authRoutes from './routes/auth.js'
 import { corsOptions } from './config/corsOptions.js'
@@ -43,6 +44,7 @@ app.use('/auth', authRoutes)
 app.use('/users', userRoutes)
 app.use('/visitors', visitorRoutes)
 app.use('/sites', siteRoutes)
+app.use('/gates', gateRoutes)
 app.use('/guards', guardRoutes)
 app.use('/guardAssignments', guardAssignmentRoutes)
 
