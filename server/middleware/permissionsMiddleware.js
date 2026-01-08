@@ -1,11 +1,7 @@
 const authorizePermissions = (...allowedRoles) => (req, res, next) => {
-  if (
-    !req.user ||
-    !Array.isArray(req.user.permissions) ||
-    !req.user.permissions.some(p => allowedRoles.includes(p))
-  ) {
-    return res.status(403).json({ message: "Forbidden: insufficient permissions" });
-  }
+  if (!req.user || !allowedRoles.includes(req.user.role)) {
+  return res.status(403).json({ message: "Forbidden: insufficient permissions" });
+}
   next();
 };
 
