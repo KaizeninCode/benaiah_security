@@ -36,8 +36,8 @@ const loginUser = async (req, res) => {
     };
 
     const token = jsonwebtoken.sign(payload, jwtSecret, { expiresIn: "1h" });
-
-    res.status(200).json({ message: "Login successful.", user, token });
+    const { password: _password, ...userWithoutPassword } = user.toObject();
+    res.status(200).json({ message: "Login successful.", user: userWithoutPassword, token });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error.");
