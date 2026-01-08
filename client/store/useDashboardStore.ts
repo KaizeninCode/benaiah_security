@@ -21,6 +21,12 @@ export type DashboardStats = {
   visitorsThisMonth: number;
 };
 
+export type UserPageStats = {
+  hosts: number;
+  guards: number;
+  visitors: number;
+};
+
 type DashboardState = {
   user: User | null;
   token: string | null;
@@ -29,6 +35,11 @@ type DashboardState = {
   setToken: (token: string) => void;
   setStats: (stats: DashboardStats) => void;
   logout: () => void;
+};
+
+type UserDashboardState = {
+  userPageStats: UserPageStats | null;
+  setUserPageStats: (userPageStats: UserPageStats) => void;
 };
 
 const initialToken =
@@ -59,8 +70,13 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   },
   setStats: (stats: DashboardStats) => set({ stats }),
   logout: () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     set({ user: null, token: null });
-  }
+  },
+}));
+
+export const useUserDashboardStore = create<UserDashboardState>((set) => ({
+  userPageStats: null,
+  setUserPageStats: (userPageStats: UserPageStats) => set({ userPageStats }),
 }));
