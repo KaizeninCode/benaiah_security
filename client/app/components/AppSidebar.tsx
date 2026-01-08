@@ -36,11 +36,14 @@ import {
 
 import { usePathname } from "next/navigation";
 import { useDashboardStore } from "@/store/useDashboardStore";
+import { useRouter } from "next/navigation";
 
 
 export function AppSidebar() {
   const user = useDashboardStore((state) => state.user);
+  const logout = useDashboardStore((state) => state.logout);
   const pathname = usePathname()
+  const router = useRouter()
   // menu items
   const items = [
     { label: "Home", icon: Home, href: "/dashboard" },
@@ -132,7 +135,12 @@ export function AppSidebar() {
                 <DropdownMenuItem>
                   <span>Account</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                onClick={() => {
+                  logout()
+                  router.push('/auth/login')
+                }}
+                >
                   <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

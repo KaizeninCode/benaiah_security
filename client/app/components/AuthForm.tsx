@@ -62,8 +62,10 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
         });
         if (response.ok) {
           const data = await response.json();
-          setUser(data.username);
+          setUser(data.user);
           setToken(data.token);
+          localStorage.setItem('token', data.token)
+          localStorage.setItem('user', JSON.stringify(data.user))
           router.push("/dashboard");
         }
         break;
