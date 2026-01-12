@@ -4,7 +4,6 @@ import * as contactMessagesController from "../controllers/contactMessagesContro
 import authMiddleware from "../middleware/authMiddleware.js";
 import authorizePermissions from "../middleware/permissionsMiddleware.js";
 
-router.use(authMiddleware);
 
 /**
  * @swagger
@@ -19,6 +18,7 @@ router.use(authMiddleware);
  */
 router.get(
   "/",
+  authMiddleware,
   authorizePermissions("admin", "manager"),
   contactMessagesController.getAllContactMesssages
 );
@@ -42,6 +42,7 @@ router.get(
  */
 router.get(
   "/:id",
+  authMiddleware,
   authorizePermissions("admin", "manager"),
   contactMessagesController.getOneContactMessage
 );
@@ -95,6 +96,7 @@ router.post(
  */
 router.delete(
   "/:id",
+  authMiddleware,
   authorizePermissions("admin"),
   contactMessagesController.deleteContactMessage
 );
