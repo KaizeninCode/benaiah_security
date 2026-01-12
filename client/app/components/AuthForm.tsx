@@ -114,14 +114,14 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email or Phone Number</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="you@example.com or 123-456-7890"
+              placeholder="you@example.com"
             />
           </div>
           {type == "register" && (
