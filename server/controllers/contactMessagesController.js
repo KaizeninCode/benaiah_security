@@ -6,7 +6,7 @@ GET /contact-messages - Retrieve all contact messages
 GET /contact-messages/:id - Retrieve a specific contact message by ID
 DELETE /contact-messages/:id - Delete a specific contact message by ID
 */
-
+import ContactMessage from "../models/ContactMessage.js";
 export const createContactMessage = async (req, res) => {
   const { firstName, lastName, email, phoneNumber, message } = req.body;
 
