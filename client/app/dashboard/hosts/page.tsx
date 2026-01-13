@@ -20,11 +20,11 @@ import {
 // import NewManagerForm from "./components/NewManagerForm";
 import { getRoleTextColor, roleColors } from "@/lib/roleColors";
 import { ChartAreaInteractive } from "@/app/components/InteractiveChart";
-import GateStatsCard from "./components/GateStatsCard";
+import HostStatsCard from "./components/HostStatsCard";
 // import { ChartBarStacked } from "./components/StackedBarChart";
 // import   {NotificationsList}  from "./components/NotificationsList";
 
-const GatesPage = () => {
+const HostsPage = () => {
   const router = useRouter();
   const userPageStats = useUserDashboardStore((state) => state.userPageStats);
   const token = useDashboardStore((state) => state.token);
@@ -67,11 +67,11 @@ const GatesPage = () => {
 
   return (
     <div className="w-full py-8 px-4 md:px-12 flex flex-col gap-4">
-      <TopCard title="Gate Management" description="Manage your gates here." />
+      <TopCard title="Host Management" description="Manage your hosts here." />
 
-      <GateStatsCard />
+      <HostStatsCard />
     </div>
   );
 };
 
-export default GatesPage;
+export default HostsPage;

@@ -10,38 +10,37 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
-import { toast } from "sonner"
-import { roleColors, getRoleBgColor, getRoleTextColor, getHoverRoleColor } from "@/lib/roleColors";
 
-type NewVisitorFormProps = {
+type NewGuardFormProps = {
   onSuccess?: () => void;
 };
 
-export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
-  const user = useDashboardStore((state) => state.user);
+export default function NewGuardForm({onSuccess} : NewGuardFormProps) {
+  const setUser = useDashboardStore((state) => state.setUser);
   const token = useDashboardStore((state) => state.token);
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [purpose, setPurpose] = useState("");
-  const [host, setHost] = useState("");
-  const [site, setSite] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     // Basic validation
-    if (!name || !phone || !idNumber || !purpose || !host || !site) {
+    if (!email || !phone || !username || !password) {
       setError("All fields are required.");
       return;
     }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/visitors`,
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/admin/register`,
         {
           method: "POST",
           headers: {
@@ -49,31 +48,26 @@ export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name,
+            email,
             phone: Number(phone),
-            idNumber,
-            purpose,
-            host,
-            site,
+            username,
+            password,
+            role: "guard",
           }),
         }
       );
       if (!response.ok) {
         const data = await response.json();
-        setError(data.message || "Failed to create visitor.");
-        toast.error(data.message || "Failed to create visitor.");
+        setError(data.message || "Failed to create guard.");
         return;
       }
-      toast.success("Visitor created successfully!");
       onSuccess && onSuccess();
       // Optionally reset form or close dialog here
       
-      setName("");
+      setEmail("");
       setPhone("");
-      setIdNumber("");
-      setPurpose("");
-      setHost("");
-      setSite("");
+      setUsername("");
+      setPassword("");
       setError("");
       // Optionally, show a success message or refresh the list
     } catch (err) {
@@ -83,6 +77,7 @@ export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
 
   return (
     <Card className="w-4/5 m-auto max-md:my-10 h-fit">
+     
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -91,32 +86,32 @@ export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
             </Alert>
           )}
           <div className="space-y-2">
-            <Label htmlFor="name">Visitor Name</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="name"
+              id="username"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="Visitor Name"
+              placeholder="Username"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="idNumber">ID Number</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="idNumber"
-              type="text"
-              value={idNumber}
-              onChange={(e) => setIdNumber(e.target.value)}
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="00000000"
+              placeholder="you@example.com"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
             <Input
               id="phone"
-              type="number"
+              type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
@@ -124,47 +119,24 @@ export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="purpose">Purpose</Label>
+            <Label htmlFor="password">Password</Label>
             <Input
-              id="purpose"
+              id="password"
               type="text"
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Purpose of visit"
+              placeholder="Password"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="host">Host</Label>
-            <Input
-              id="host"
-              type="text"
-              value={host}
-              onChange={(e) => setHost(e.target.value)}
-              required
-              placeholder="Host"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="site">Site</Label>
-            <Input
-              id="site"
-              type="text"
-              value={site}
-              onChange={(e) => setSite(e.target.value)}
-              required
-              placeholder="Site"
-            />
-          </div>
-
           
-
+          
           <div className="w-2/5 mx-auto">
             <Button
               type="submit"
-              className={`${roleColors[user?.role as keyof typeof roleColors]} w-full cursor-pointer`}
+              className=" bg-red-500 w-full hover:bg-red-800 cursor-pointer"
             >
-              Create Visitor
+              Create Guard
             </Button>
           </div>
         </form>

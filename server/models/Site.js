@@ -5,7 +5,7 @@ const siteSchema = new mongoose.Schema({
   location: { type: String, required: true },
   description: { type: String },
   gates: [{ type: mongoose.Schema.Types.ObjectId, ref: "Gate" }],
-  users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  hosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   guards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Guard" }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

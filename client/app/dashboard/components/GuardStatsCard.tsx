@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardStats } from "@/store/useDashboardStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getRoleTextColor } from "@/lib/roleColors";
+import { getRoleTextColor, roleColors } from "@/lib/roleColors";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import {
   ColumnDef,
@@ -17,14 +17,7 @@ import {
   getFilteredRowModel,
 } from "@tanstack/react-table";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table } from "@chakra-ui/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +32,13 @@ import {
 import { MoreHorizontal, ArrowUpDown, PlusCircle } from "lucide-react";
 import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import NewVisitorForm from "./NewVisitorForm";
 // import { useEffect, useState } from "react";
 
@@ -48,16 +47,9 @@ type GuardMetricsProps = {
 };
 
 // const GuardMetrics = ({ stats }: GuardMetricsProps) => {
-const GuardMetrics = () => {
+const GuardStatsCard = () => {
   const user = useDashboardStore((state) => state.user);
-  //   if (!stats) {
-  //     return (
-  //       <div className="grid grid-cols-2 gap-4">
-  //         <Skeleton className="h-24" />
-  //         <Skeleton className="h-24" />
-  //       </div>
-  //     );
-  //   }
+  
 
   const metrics = [
     { label: "Total Visitors", value: 20 },
@@ -65,13 +57,6 @@ const GuardMetrics = () => {
     { label: "Departed", value: 10 },
   ];
 
-  type Visitor = {
-    name: string;
-    phone: number;
-    checkInTime: string;
-    checkOutTime: string | null;
-    status: string | null;
-  };
 
   const visitors = [
     {
@@ -109,102 +94,65 @@ const GuardMetrics = () => {
       checkOutTime: null,
       status: "arrived",
     },
+    {
+      name: "Alice Johnson",
+      phone: 1234567890,
+      checkInTime: "2024-10-01T09:00:00Z",
+      checkOutTime: null,
+      status: "arrived",
+    },
+    {
+      name: "Bob Smith",
+      phone: 2345678901,
+      checkInTime: "2024-10-01T10:30:00Z",
+      checkOutTime: "2024-10-01T12:00:00Z",
+      status: "departed",
+    },
+    {
+      name: "Charlie Brown",
+      phone: 3456789012,
+      checkInTime: "2024-10-01T11:15:00Z",
+      checkOutTime: null,
+      status: "arrived",
+    },
+    {
+      name: "Diana Prince",
+      phone: 4567890123,
+      checkInTime: "2024-10-01T08:45:00Z",
+      checkOutTime: "2024-10-01T11:30:00Z",
+      status: "departed",
+    },
+    {
+      name: "Ethan Hunt",
+      phone: 5678901234,
+      checkInTime: "2024-10-01T09:30:00Z",
+      checkOutTime: null,
+      status: "arrived",
+    },
   ];
 
-  //   table column definition
-  const columns: ColumnDef<Visitor>[] = [
-    {
-      accessorKey: "name",
-      header: "Name",
-    },
-    {
-      accessorKey: "phone",
-      header: "Phone",
-    },
-    {
-      accessorKey: "checkInTime",
-      header: () => <div className="text-center">Check-In Time</div>,
-      cell: ({ row }) => {
-        const value = row.getValue("checkInTime") as string;
-        const date = new Date(value);
-        const formatted = isNaN(date.getTime())
-          ? "-"
-          : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        return <div className="text-center">{formatted}</div>;
-      },
-    },
-    {
-      accessorKey: "checkOutTime",
-      header: () => <div className="text-center">Check-Out Time</div>,
-      cell: ({ row }) => {
-        const value = row.getValue("checkOutTime") as string;
-        const date = new Date(value);
-        const formatted = isNaN(date.getTime())
-          ? "-"
-          : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        return <div className="text-center">{formatted}</div>;
-      },
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-    },
-    {
-      id: "actions",
-      header: "",
-      cell: ({ row }) => {
-        const visitor = row.original;
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="uppercase">
-                Actions
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(visitor.name)}
-              >
-                Copy visitor name
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Mark as departed</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
-    },
-  ];
+  
   const [isVisitorOpen, setIsVisitorOpen] = useState(false);
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const table = useReactTable({
-    data: visitors,
-    columns: columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    getFilteredRowModel: getFilteredRowModel(),
-    state: { sorting, columnFilters, globalFilter },
-    globalFilterFn: (row, columnId, filterValue) => {
-      // filter by name, phone, or status
-      const { name, phone, status } = row.original;
-      const search = filterValue.toLowerCase();
-      return (
-        name.toLowerCase().includes(search) ||
-        phone.toString().includes(search) ||
-        (status ? status?.toLowerCase().includes(search) : false)
-      );
-    },
+  const [filter, setFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+
+  // Filter visitors based on filter state
+  const filteredVisitors = visitors.filter((visitor) => {
+    const search = filter.toLowerCase();
+    return (
+      visitor.name.toLowerCase().includes(search) ||
+      visitor.phone.toString().includes(search) ||
+      (visitor.status ? visitor.status.toLowerCase().includes(search) : false)
+    );
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredVisitors.length / pageSize) || 1;
+  const paginatedVisitors = filteredVisitors.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
 
   return (
     <div className="gap-4 w-full h-1/4">
@@ -235,95 +183,131 @@ const GuardMetrics = () => {
         ))} */}
 
       {/* TABULATED LIST OF VISITORS */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between py-4">
-          <Input
-            placeholder="Search visitors..."
-            value={table.getState().globalFilter ?? ""}
-            onChange={(event) => {
-              const value = event.target.value;
-              if (debounceRef.current) clearTimeout(debounceRef.current);
-              debounceRef.current = setTimeout(() => {
-                table.setGlobalFilter(value);
-              }, 500);
-            }}
-            className="max-w-sm"
-          />
-              <Button onClick={() => alert('Clicked!')} className="cursor-pointer">
-                {" "}
-                <PlusCircle /> Create New Visitor
-              </Button>
-          
-        </div>
-        <div className="overflow-hidden rounded-lg border max-w-6xl p-3 bg-white shadow-sm">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
+      <div className="mt-8 h-3/4">
+              <div className="flex items-center justify-between py-4">
+                <Input
+                  placeholder="Search sites..."
+                  value={filter}
+                  onChange={(event) => setFilter(event.target.value)}
+                  className="max-w-sm"
+                />
+                {/* NEW VISITOR BUTTON AND DIALOG */}
+                <Dialog open={isVisitorOpen} onOpenChange={setIsVisitorOpen}>
+                  <DialogTrigger asChild>
+                    <Button className={`${roleColors[user?.role as keyof typeof roleColors] } cursor-pointer`}>
+                      <PlusCircle /> Create New Visitor
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogTitle className="text-center">
+                      Create New Visitor
+                    </DialogTitle>
+                    <NewVisitorForm onSuccess={() => setIsVisitorOpen(false)} />
+                    <DialogDescription></DialogDescription>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div className="overflow-hidden rounded-lg border max-w-6xl p-3 bg-white shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Phone
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Check-In Time
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Check-Out Time
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paginatedVisitors.length ? (
+                      paginatedVisitors.map((visitor, idx) => (
+                        <tr key={idx}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {visitor.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {visitor.phone}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {visitor.checkInTime
+                              ? new Date(visitor.checkInTime).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {visitor.checkOutTime
+                              ? new Date(visitor.checkOutTime).toLocaleTimeString(
+                                  [],
+                                  { hour: "2-digit", minute: "2-digit" }
+                                )
+                              : "-"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {visitor.status}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuLabel>Edit</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Delete</DropdownMenuLabel>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="h-24 text-center">
+                          No results.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                <div className="flex items-center justify-end space-x-2 py-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
+                    Previous
+                  </Button>
+                  <span className="text-sm px-2">
+                    Page {page} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
                   >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </div>
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </div>
       {/* <Card className="flex justify-center items-center mt-8">
           <CardContent>
           </CardContent>
@@ -332,4 +316,4 @@ const GuardMetrics = () => {
   );
 };
 
-export default GuardMetrics;
+export default  GuardStatsCard;

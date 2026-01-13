@@ -51,7 +51,7 @@ export function AppSidebar() {
     { label: "Home", icon: Home, href: "/dashboard", roles: ['admin', 'manager', 'visitor', 'guard', 'host'] },
     { label: "Users", icon: UsersRound, href: "/dashboard/users", roles: ['admin', 'manager']  },
     { label: "Sites", icon: Building2, href: "/dashboard/sites", roles: ['admin', 'manager']  },
-    { label: "Visitors", icon: CircleUserRound, href: "/dashboard/visitors", roles: ['admin', 'manager', 'host']  },
+    { label: "Hosts", icon: CircleUserRound, href: "/dashboard/hosts", roles: ['admin', 'manager']  },
     { label: "Guards", icon: ShieldUser, href: "/dashboard/guards", roles: ['admin', 'manager']  },
     { label: "Gates", icon: DoorOpen, href: "/dashboard/gates", roles: ['admin', 'manager']  },
   ];

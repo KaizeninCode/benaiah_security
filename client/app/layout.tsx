@@ -30,16 +30,16 @@ export default function RootLayout({
   const pathname = usePathname();
   const isUserPage = pathname.startsWith("/auth") || pathname.startsWith('/dashboard');
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} antialiased`}
-      >
-        {/* <ThemeProvider attribute={'class'} defaultTheme="system" enableSystem> */}
-          {!isUserPage && <Header />}
-          {children}
-          {!isUserPage && <Footer />}
-        {/* </ThemeProvider> */}
-      </body>
-    </html>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} antialiased`}
+        >
+          {/* <ThemeProvider attribute={'class'} defaultTheme="system" enableSystem> */}
+            {!isUserPage && <Header />}
+            {children}
+            {!isUserPage && <Footer />}
+          {/* </ThemeProvider> */}
+        </body>
+      </html>
   );
 }

@@ -10,19 +10,24 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
-import { toast } from "sonner"
-import { roleColors, getRoleBgColor, getRoleTextColor, getHoverRoleColor } from "@/lib/roleColors";
+import { toast } from "sonner";
+import {
+  roleColors,
+  getRoleBgColor,
+  getRoleTextColor,
+  getHoverRoleColor,
+} from "@/lib/roleColors";
 
-type NewVisitorFormProps = {
+type NewSiteFormProps = {
   onSuccess?: () => void;
 };
 
-export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
+export default function NewSiteForm({ onSuccess }: NewSiteFormProps) {
   const user = useDashboardStore((state) => state.user);
   const token = useDashboardStore((state) => state.token);
   const router = useRouter();
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [purpose, setPurpose] = useState("");
   const [host, setHost] = useState("");
@@ -34,14 +39,14 @@ export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
     setError("");
 
     // Basic validation
-    if (!name || !phone || !idNumber || !purpose || !host || !site) {
+    if (!name || !location) {
       setError("All fields are required.");
       return;
     }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/visitors`,
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/sites`,
         {
           method: "POST",
           headers: {
@@ -50,30 +55,22 @@ export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
           },
           body: JSON.stringify({
             name,
-            phone: Number(phone),
-            idNumber,
-            purpose,
-            host,
-            site,
+            location,
           }),
         }
       );
       if (!response.ok) {
         const data = await response.json();
-        setError(data.message || "Failed to create visitor.");
-        toast.error(data.message || "Failed to create visitor.");
+        setError(data.message || "Failed to create site.");
+        toast.error(data.message || "Failed to create site.");
         return;
       }
-      toast.success("Visitor created successfully!");
+      toast.success("Site created successfully!");
       onSuccess && onSuccess();
       // Optionally reset form or close dialog here
-      
+
       setName("");
-      setPhone("");
-      setIdNumber("");
-      setPurpose("");
-      setHost("");
-      setSite("");
+      setLocation("");
       setError("");
       // Optionally, show a success message or refresh the list
     } catch (err) {
@@ -91,72 +88,27 @@ export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
             </Alert>
           )}
           <div className="space-y-2">
-            <Label htmlFor="name">Visitor Name</Label>
+            <Label htmlFor="name">Site Name</Label>
             <Input
               id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="Visitor Name"
+              placeholder="Site Name"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="idNumber">ID Number</Label>
+            <Label htmlFor="location">Location</Label>
             <Input
-              id="idNumber"
+              id="location"
               type="text"
-              value={idNumber}
-              onChange={(e) => setIdNumber(e.target.value)}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
               required
-              placeholder="00000000"
+              placeholder="Nairobi, Kenya"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-              placeholder="Phone number"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="purpose">Purpose</Label>
-            <Input
-              id="purpose"
-              type="text"
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
-              required
-              placeholder="Purpose of visit"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="host">Host</Label>
-            <Input
-              id="host"
-              type="text"
-              value={host}
-              onChange={(e) => setHost(e.target.value)}
-              required
-              placeholder="Host"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="site">Site</Label>
-            <Input
-              id="site"
-              type="text"
-              value={site}
-              onChange={(e) => setSite(e.target.value)}
-              required
-              placeholder="Site"
-            />
-          </div>
-
           
 
           <div className="w-2/5 mx-auto">
@@ -164,7 +116,7 @@ export default function NewVisitorForm({ onSuccess }: NewVisitorFormProps) {
               type="submit"
               className={`${roleColors[user?.role as keyof typeof roleColors]} w-full cursor-pointer`}
             >
-              Create Visitor
+              Create Site
             </Button>
           </div>
         </form>
