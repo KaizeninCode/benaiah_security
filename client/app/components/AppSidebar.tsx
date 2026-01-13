@@ -42,17 +42,18 @@ import { roleColors, getHoverRoleColor, getRoleBgColor, getRoleTextColor } from 
 
 export function AppSidebar() {
   const user = useDashboardStore((state) => state.user);
+  const userRole = useDashboardStore((state) => state.user?.role);
   const logout = useDashboardStore((state) => state.logout);
   const pathname = usePathname()
   const router = useRouter()
   // menu items
   const items = [
-    { label: "Home", icon: Home, href: "/dashboard" },
-    { label: "Users", icon: UsersRound, href: "/dashboard/users" },
-    { label: "Sites", icon: Building2, href: "/dashboard/sites" },
-    { label: "Visitors", icon: CircleUserRound, href: "/dashboard/visitors" },
-    { label: "Guards", icon: ShieldUser, href: "/dashboard/guards" },
-    { label: "Gates", icon: DoorOpen, href: "/dashboard/gates" },
+    { label: "Home", icon: Home, href: "/dashboard", roles: ['admin', 'manager', 'visitor', 'guard', 'host'] },
+    { label: "Users", icon: UsersRound, href: "/dashboard/users", roles: ['admin', 'manager']  },
+    { label: "Sites", icon: Building2, href: "/dashboard/sites", roles: ['admin', 'manager']  },
+    { label: "Visitors", icon: CircleUserRound, href: "/dashboard/visitors", roles: ['admin', 'manager', 'host']  },
+    { label: "Guards", icon: ShieldUser, href: "/dashboard/guards", roles: ['admin', 'manager']  },
+    { label: "Gates", icon: DoorOpen, href: "/dashboard/gates", roles: ['admin', 'manager']  },
   ];
 
   const supportItems = [
@@ -81,13 +82,15 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item, i) => {
+              {items
+                .filter(item => item.roles.includes(userRole!))
+                .map((item, i) => {
                 const isActive = pathname === item.href;
                 return (
                 <SidebarMenuItem key={i}>
-                  <SidebarMenuButton className={isActive ? getHoverRoleColor(user?.role) : ''} asChild>
-                    <a href={item.href} className={isActive ? `${getRoleBgColor(user?.role)} ${getHoverRoleColor(user?.role)} ${getRoleTextColor(user?.role)}} font-bold` : ""}>
-                      <item.icon className={isActive ? getRoleTextColor(user?.role) : "text-slate-500"} />
+                  <SidebarMenuButton className={isActive ? getHoverRoleColor(userRole) : ''} asChild>
+                    <a href={item.href} className={isActive ? `${getRoleBgColor(userRole)} ${getHoverRoleColor(userRole)} ${getRoleTextColor(userRole)}} font-bold` : ""}>
+                      <item.icon className={isActive ? getRoleTextColor(userRole) : "text-slate-500"} />
                       <span>{item.label}</span>
                     </a>
                   </SidebarMenuButton>

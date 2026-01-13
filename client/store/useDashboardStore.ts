@@ -19,6 +19,7 @@ export type DashboardStats = {
   totalGates: number;
   activeGates: number;
   visitorsThisMonth: number;
+  visitorsToday: number;
 };
 
 export type UserPageStats = {

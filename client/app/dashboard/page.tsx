@@ -18,6 +18,7 @@ import { useDashboardStore } from "@/store/useDashboardStore";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { roleColors, getRoleTextColor } from "@/lib/roleColors";
+import GuardStatsCard from "./components/GuardStatsCard";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -85,6 +86,7 @@ export default function Dashboard() {
           ? gates.gates.filter((g: { status: string }) => g.status === "active").length
           : 0,
         visitorsThisMonth: users.users.filter((u: { role: string }) => u.role === "visitor").length,
+        visitorsToday: visitors.total,
       };
       useDashboardStore.getState().setStats(stats);
     });
@@ -151,12 +153,16 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+
+        {/* GUARD STATS -> FOR GUARD DASHBOARD */}
+        {/* <GuardStatsCard stats={stats}/> */}
+        <GuardStatsCard />
         {/* GUARD METRICS */}
-        <GuardMetrics stats={stats} />
+        {(user?.role == 'admin' || user?.role == 'manager') && <GuardMetrics stats={stats} />}
         {/* INTERACTIVE CHART */}
-        <ChartAreaInteractive />
+        {(user?.role == 'admin' || user?.role == 'manager') && <ChartAreaInteractive />}
         {/* SITES AND GATES METRICS */}
-        <SitesGatesMetrics stats={stats} />
+        {(user?.role == 'admin' || user?.role == 'manager') && <SitesGatesMetrics stats={stats} />}
       </div>
     </div>
   );

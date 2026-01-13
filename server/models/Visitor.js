@@ -6,7 +6,7 @@ const visitorSchema = new mongoose.Schema(
     idNumber: { type: String, required: true }, // National ID or similar
     purpose: { type: String, required: true },
     vehicleReg: { type: String },
-    expectedTime: { type: Date, required: true },
+    expectedTime: { type: Date },
     arrivalTime: { type: Date },
     departureTime: { type: Date },
     host: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
