@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
-import { Spinner } from "@/components/ui/spinner"
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AuthForm({ type }: { type: "login" | "register" }) {
   const setUser = useDashboardStore((state) => state.setUser);
@@ -53,40 +53,52 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
         break;
     }
 
-    let response;
-    // API call
-    switch (type) {
-      case "login":
-        setIsLoading(true);
-        response = await fetch(`${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-          setToken(data.token);
-          localStorage.setItem('token', data.token)
-          localStorage.setItem('user', JSON.stringify(data.user))
-          router.push("/dashboard");
-        }
-        break;
-      case "register":
-        setIsLoading(true);
-        response = await fetch(
-          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/register`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password, phone, username }),
+    setIsLoading(true);
+    try {
+      let response;
+      switch (type) {
+        case "login":
+          response = await fetch(
+            `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/login`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            },
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data.user);
+            setToken(data.token);
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            router.push("/dashboard");
+          } else {
+            setError("Login failed. Please check your credentials.");
           }
-        );
-        if (response.ok) router.push("/auth/login");
-        break;
-
-      default:
-        break;
+          break;
+        case "register":
+          response = await fetch(
+            `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/register`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password, phone, username }),
+            },
+          );
+          if (response.ok) {
+            router.push("/auth/login");
+          } else {
+            setError("Registration failed. Please try again.");
+          }
+          break;
+        default:
+          break;
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -218,7 +230,7 @@ export default function AuthForm({ type }: { type: "login" | "register" }) {
               className=" bg-red-500 w-full hover:bg-red-800 cursor-pointer"
             >
               <div className="w-fit flex items-center gap-2">
-                {isLoading && <Spinner className="mx-auto size-4" /> }
+                {isLoading && <Spinner className="mx-auto size-4" />}
                 {type == "register" ? "Register" : "Sign In"}
               </div>
             </Button>
