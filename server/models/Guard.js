@@ -9,7 +9,7 @@ const guardSchema = new mongoose.Schema(
     assignedSite: { type: mongoose.Schema.Types.ObjectId, ref: "Site" },
     status: {
       type: String,
-      enum: ["active", "inactive", "transferred"],
+      enum: ["active", "inactive"],
       default: "active",
     },
       hireDate: { type: Date, default: Date.now },

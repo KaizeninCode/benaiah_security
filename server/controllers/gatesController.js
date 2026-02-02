@@ -26,8 +26,8 @@ export const getGateById = async (req, res) => {
 // Create a new gate
 export const createGate = async (req, res) => {
   try {
-    const { name, site, status } = req.body;
-    const gate = new Gate({ name, site, status });
+    const { name, site } = req.body;
+    const gate = new Gate({ name, site });
     await gate.save();
     res.status(201).json(gate);
   } catch (err) {
@@ -64,6 +64,18 @@ export const getActiveGates = async (req, res) => {
     res.status(200).json({total: activeGates.length, gates: activeGates});
     if (activeGates.length === 0)
       return res.status(200).json({ message: "No active gates found", total: 0, gates: [] });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// get inactive gates
+export const getInactiveGates = async (req, res) => {
+  try {
+    const inactiveGates = await Gate.find({ status: "inactive" }).populate("site");
+    res.status(200).json({total: inactiveGates.length, gates: inactiveGates});
+    if (inactiveGates.length === 0)
+      return res.status(200).json({ message: "No inactive gates found", total: 0, gates: [] });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
