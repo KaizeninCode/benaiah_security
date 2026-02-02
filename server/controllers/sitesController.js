@@ -93,14 +93,14 @@ export const getOneSite = async (req, res) => {
 // 4. Update site
 export const updateSite = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const site = await Site.findById(id).exec();
     if (!site) return res.status(400).json({ message: "Site not found." });
 
     // update fields
-    for (const key in req.body) {
+    for (const key in req.params) {
       if (req.body.hasOwnProperty(key) && key !== "id") {
-        site[key] = req.body[key];
+        site[key] = req.params[key];
       }
     }
     await site.save();
