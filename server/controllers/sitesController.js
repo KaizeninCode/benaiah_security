@@ -90,23 +90,16 @@ export const getOneSite = async (req, res) => {
   }
 };
 
-// 4. Update site
+// 4. Update site --> ID FROM PARAMS, BODY HAS FIELDS TO UPDATE
 export const updateSite = async (req, res) => {
   try {
     const { id } = req.params;
-    const site = await Site.findById(id).exec();
+    const {name, location, status, description} = req.body
+    const site = await Site.findByIdAndUpdate(id, {name, location, status, description}, {new: true}).exec();
     if (!site) return res.status(400).json({ message: "Site not found." });
 
-    // update fields
-    for (const key in req.params) {
-      if (req.body.hasOwnProperty(key) && key !== "id") {
-        site[key] = req.params[key];
-      }
-    }
-    await site.save();
     res.status(200).json({ message: "Site updated successfully.", site });
-    if (!res.ok)
-      return res.status(400).json({ message: "Failed to update site." });
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error retrieving site." });
