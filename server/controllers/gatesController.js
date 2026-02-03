@@ -95,7 +95,7 @@ export const updateGate = async (req, res) => {
       id,
       { name, site, status, guards },
       { new: true }
-    );
+    ).populate('site');
     
     return res.status(200).json({ 
       message: "Gate updated successfully.", 
