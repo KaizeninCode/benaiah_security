@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/combobox";
 
 import { toast } from "sonner";
+import { roleColors } from "@/lib/roleColors";
 
 type NewGateFormProps = {
   onSuccess?: () => void;
@@ -234,9 +235,9 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-red-500 w-full hover:bg-red-800 cursor-pointer"
+              className={`${roleColors[user?.role as keyof typeof roleColors]} w-full cursor-pointer`}
             >
-              {isLoading ? "Creating..." : "Create Gate"}
+              {isLoading ? "Creating..." : "Create"}
             </Button>
           </div>
         </form>

@@ -11,13 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { toast } from "sonner";
+import { roleColors } from "@/lib/roleColors";
 
 type NewGuardFormProps = {
   onSuccess?: () => void;
 };
 
 export default function NewGuardForm({ onSuccess }: NewGuardFormProps) {
-  const setUser = useDashboardStore((state) => state.setUser);
+  const user = useDashboardStore((state) => state.user);
   const token = useDashboardStore((state) => state.token);
   const addGuard = useDashboardStore((state) => state.addGuard);
   const setSites = useDashboardStore((state) => state.setSites);
@@ -148,7 +149,7 @@ export default function NewGuardForm({ onSuccess }: NewGuardFormProps) {
             <Button
               disabled={isLoading}
               type="submit"
-              className=" bg-red-500 w-full hover:bg-red-800 cursor-pointer"
+              className={`${roleColors[user?.role as keyof typeof roleColors]} w-full cursor-pointer`}
             >
               {isLoading ? "Creating guard..." : "Create Guard"}
             </Button>

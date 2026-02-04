@@ -128,7 +128,7 @@ export default function NewSiteForm({ onSuccess }: NewSiteFormProps) {
               disabled={isLoading}
               className={`${roleColors[user?.role as keyof typeof roleColors]} w-full cursor-pointer`}
             >
-              {isLoading ? 'Creating site...' : 'Create Site'}
+              {isLoading ? 'Creating...' : 'Create'}
             </Button>
           </div>
         </form>

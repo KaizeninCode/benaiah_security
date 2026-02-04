@@ -182,7 +182,7 @@ export default function UpdateGuardForm({
               disabled={isLoading}
               className={`${roleColors[user?.role as keyof typeof roleColors]} w-full cursor-pointer`}
             >
-              {isLoading ? "Updating..." : "Update Guard"}
+              {isLoading ? "Updating..." : "Update"}
             </Button>
           </div>
         </form>
