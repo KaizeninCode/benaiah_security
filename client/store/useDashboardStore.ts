@@ -57,6 +57,18 @@ export type Gate = {
   guards: string[];
 };
 
+// HOSTS
+export type Host = {
+  id: string;
+  site: { _id: string; id: string; name: string; location: string }; // Can be ID or populated object
+  status: "active" | "inactive";
+  name: string;
+  email: string;
+  phoneNumber: string;
+  idNumber: string;
+  unit: string;
+};
+
 type DashboardState = {
   user: User | null;
   token: string | null;
@@ -64,6 +76,7 @@ type DashboardState = {
   sites: Site[];
   guards: Guard[];
   gates: Gate[];
+  hosts: Host[];
   setUser: (user: User) => void;
   setToken: (token: string) => void;
   setStats: (stats: DashboardStats) => void;
@@ -85,6 +98,12 @@ type DashboardState = {
   addGate: (gate: Gate) => void;
   updateGate: (id: string, gate: Partial<Gate>) => void;
   deleteGate: (id: string) => void;
+
+  // HOST MANAGEMENT
+  setHosts: (hosts: Host[]) => void;
+  addHost: (host: Host) => void;
+  updateHost: (id: string, host: Partial<Host>) => void;
+  deleteHost: (id: string) => void;
 
   logout: () => void;
 };
@@ -115,6 +134,7 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   sites: [],
   guards: [],
   gates: [],
+  hosts: [],
   setUser: (user: User) => {
     localStorage.setItem("user", JSON.stringify(user));
     set({ user });
@@ -177,10 +197,40 @@ export const useDashboardStore = create<DashboardState>((set) => ({
     set((state) => ({
       gates: (state.gates || []).filter((gate) => gate.id !== id),
     })),
+
+  // HOST MANAGEMENT
+  setHosts: (hosts: Host[]) => set({ hosts }),
+  addHost: (host: Host) => {
+    console.log("addHost called with:", host); // DEBUG
+    set((state) => {
+      const newHosts = [...(state.hosts || []), host];
+      // DEBUG LOGS
+      console.log("Previous hosts:", state.hosts);
+      console.log("New hosts array:", newHosts);
+      return { hosts: newHosts };
+    });
+  },
+  updateHost: (id: string, updatedHost: Partial<Host>) =>
+    set((state) => ({
+      hosts: (state.hosts || []).map((host) =>
+        host.id === id ? { ...host, ...updatedHost } : host,
+      ),
+    })),
+  deleteHost: (id: string) =>
+    set((state) => ({
+      hosts: (state.hosts || []).filter((host) => host.id !== id),
+    })),
   logout: () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    set({ user: null, token: null, sites: [], guards: [], gates: [] });
+    set({
+      user: null,
+      token: null,
+      sites: [],
+      guards: [],
+      gates: [],
+      hosts: [],
+    });
   },
 }));
 

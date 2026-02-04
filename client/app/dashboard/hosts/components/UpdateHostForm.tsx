@@ -9,9 +9,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { useDashboardStore } from "@/store/useDashboardStore";
+import { Host, useDashboardStore } from "@/store/useDashboardStore";
 import { toast } from "sonner";
-import { roleColors } from "@/lib/roleColors";
+import {
+  roleColors,
+  getRoleBgColor,
+  getRoleTextColor,
+  getHoverRoleColor,
+} from "@/lib/roleColors";
 import {
   Select,
   SelectContent,
@@ -21,98 +26,92 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type NewHostFormProps = {
+type UpdateHostFormProps = {
+  host: Host;
   onSuccess?: () => void;
 };
 
-export default function NewHostForm({ onSuccess }: NewHostFormProps) {
-  const addHost = useDashboardStore((state) => state.addHost);
+export default function UpdateHostForm({
+  host,
+  onSuccess,
+}: UpdateHostFormProps) {
   const user = useDashboardStore((state) => state.user);
   const token = useDashboardStore((state) => state.token);
   const sites = useDashboardStore((state) => state.sites);
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [status, setStatus] = useState<"active" | "inactive">("inactive");
-  const [siteId, setSiteId] = useState("");
-  const [unit, setUnit] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const updateHost = useDashboardStore((state) => state.updateHost);
+
+  // Initialize with existing host data
+  const [name, setName] = useState(host.name);
+
+  const [status, setStatus] = useState<"active" | "inactive">(host.status);
+  const [idNumber, setIdNumber] = useState(Number(host.idNumber));
+  const [phoneNumber, setPhoneNumber] = useState(Number(host.phoneNumber));
+  const [email, setEmail] = useState(host.email);
+  const [unit, setUnit] = useState(host.unit);
+  const [siteId, setSiteId] = useState(() => {
+    // Handle different formats of host.site
+    if (typeof host.site === "string") {
+      return host.site;
+    } else if (host.site && typeof host.site === "object") {
+      return host.site.id || host.site._id || "";
+    }
+    return "";
+  });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-    // Basic validation
-    if (!email || !phoneNumber || !name || !idNumber || !unit || !siteId) {
-      setError("All fields are required.");
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/hosts`,
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/hosts/${host.id}`,
         {
-          method: "POST",
+          method: "PATCH",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             name,
-            phoneNumber: Number(phoneNumber),
-            idNumber: Number(idNumber),
+            idNumber,
+            phoneNumber,
             email,
-            site: siteId,
             unit,
+            site: siteId,
+            status,
           }),
         },
       );
+
       if (!response.ok) {
         const data = await response.json();
-        setError(data.message || "Failed to create host.");
-        toast.error(data.message || "Failed to create host.");
+        setError(data.message || "Failed to update host.");
+        toast.error(data.message || "Failed to update host.");
+        setIsLoading(false);
         return;
       }
-
       const responseData = await response.json();
-      // DEBUG LOG
-      console.log("Host created - backend response:", responseData);
 
       // Find the full site object from the store
       const fullSite = sites.find((s) => s.id === siteId);
-      // DEBUG
-      console.log("Site ID selected:", siteId);
-      console.log("Sites in store:", sites);
-      console.log("Full site found:", fullSite);
 
-      // Map _id to id for consistency
-      const hostWithId = {
+      // Map _id to id for the updated host
+      const updatedHostWithId = {
         ...responseData.host,
         id: responseData.host._id,
         site: fullSite || responseData.host.site,
       };
-      // DEBUG
-      console.log("Host with mapped data:", hostWithId);
-      addHost(hostWithId);
-      toast.success("Host created successfully!");
-      onSuccess && onSuccess();
-      // Optionally reset form or close dialog here
 
-      setEmail("");
-      setName("");
-      setPhoneNumber("");
-      setIdNumber("");
-      setSiteId("");
-      setUnit("");
-      setStatus("inactive");
-      setError("");
-      // Optionally, show a success message or refresh the list
+      // Update store with response data
+      updateHost(host.id!, updatedHostWithId);
+      toast.success("Host updated successfully!");
+      onSuccess && onSuccess();
     } catch (err) {
       setError("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -134,8 +133,27 @@ export default function NewHostForm({ onSuccess }: NewHostFormProps) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Host Name"
+              placeholder="Gate Name"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="idNumber">ID Number</Label>
+            <Input
+              id="idNumber"
+              type="number"
+              value={idNumber}
+              onChange={(e) => setIdNumber(Number(e.target.value))}
+              placeholder="ID Number"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Input
+              id="phoneNumber"
+              type="number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(Number(e.target.value))}
+              placeholder="Phone Number"
             />
           </div>
           <div className="space-y-2">
@@ -145,34 +163,9 @@ export default function NewHostForm({ onSuccess }: NewHostFormProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
+              placeholder="email@example.com"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              required
-              placeholder="Phone number"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="idNumber">ID Number</Label>
-            <Input
-              id="idNumber"
-              type="number"
-              value={idNumber}
-              onChange={(e) => setIdNumber(e.target.value)}
-              required
-              placeholder="ID Number"
-            />
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="site">Site</Label>
             <Select
@@ -186,14 +179,13 @@ export default function NewHostForm({ onSuccess }: NewHostFormProps) {
                 <SelectGroup>
                   {sites.map((site) => (
                     <SelectItem key={site.id} value={site.id}>
-                      {site.name} - {site.location}
+                      {site.name}
                     </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="unit">Unit</Label>
             <Input
@@ -201,11 +193,9 @@ export default function NewHostForm({ onSuccess }: NewHostFormProps) {
               type="text"
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              required
-              placeholder="Host Unit"
+              placeholder="Unit Number"
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
@@ -230,7 +220,7 @@ export default function NewHostForm({ onSuccess }: NewHostFormProps) {
               disabled={isLoading}
               className={`${roleColors[user?.role as keyof typeof roleColors]} w-full cursor-pointer`}
             >
-              {isLoading ? "Creating..." : "Create"}
+              {isLoading ? "Updating..." : "Update"}
             </Button>
           </div>
         </form>

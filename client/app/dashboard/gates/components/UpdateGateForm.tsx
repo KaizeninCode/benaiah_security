@@ -104,7 +104,6 @@ export default function UpdateGateForm({
         site: fullSite || responseData.gate.site,
       };
 
-       console.log("Updated gate with full site:", updatedGateWithId); // DEBUG
 
       // Update store with response data
       updateGate(gate.id!, updatedGateWithId);

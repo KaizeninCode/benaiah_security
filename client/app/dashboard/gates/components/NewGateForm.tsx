@@ -94,16 +94,11 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
       }
 
       const responseData = await response.json();
-      console.log("Gate created - backend response:", responseData); // DEBUG
       // Map _id to id for consistency
       const gateWithId = {
         ...responseData.gate,
         id: responseData.gate._id,
       };
-
-      // DEBUG CONSOLE LOGS
-      console.log("Gate with mapped ID:", gateWithId);
-      console.log("Calling addGate with:", gateWithId);
 
       addGate(gateWithId); // Add gate with the MongoDB-generated ID
       toast.success("Gate created successfully!");

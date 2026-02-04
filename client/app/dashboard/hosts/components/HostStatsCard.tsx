@@ -17,8 +17,6 @@ import {
   getFilteredRowModel,
 } from "@tanstack/react-table";
 
-import { Table } from "@chakra-ui/react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,7 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { MoreHorizontal, ArrowUpDown, PlusCircle } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -40,6 +38,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import NewHostForm from "./NewHostForm";
+import { toast } from "sonner";
+import UpdateHostForm from "./UpdateHostForm";
+import { Table } from "../../components/Table";
 
 type GuardMetricsProps = {
   stats: DashboardStats | null;
@@ -48,108 +49,227 @@ type GuardMetricsProps = {
 // const GuardMetrics = ({ stats }: GuardMetricsProps) => {
 const HostStatsCard = () => {
   const user = useDashboardStore((state) => state.user);
-  
+  const token = useDashboardStore((state) => state.token);
+  const hosts = useDashboardStore((state) => state.hosts);
+  // DEBUG LOGS
+  console.log("Hosts in table:", hosts);
+  console.log("First host site:", hosts[0]?.site);
+  const setHosts = useDashboardStore((state) => state.setHosts);
+  const deleteHost = useDashboardStore((state) => state.deleteHost);
+  const sites = useDashboardStore((state) => state.sites);
+  const setSites = useDashboardStore((state) => state.setSites);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  // Fetch sites and hosts when component mounts
+  useEffect(() => {
+    const fetchSites = async () => {
+      if (sites.length > 0) return; // Don't fetch if already loaded
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/sites`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch sites");
+
+        const data = await response.json();
+        const sitesWithId = data.sites.map((site: any) => ({
+          ...site,
+          id: site._id,
+        }));
+        setSites(sitesWithId);
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+        toast.error("Failed to load sites");
+      }
+    };
+
+    const fetchHosts = async () => {
+      if (hosts.length > 0) return; // Don't fetch if already loaded
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/hosts`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch hosts");
+
+        const data = await response.json();
+        const hostsWithId = data.hosts.map((hosts: any) => ({
+          ...hosts,
+          id: hosts._id,
+          site: hosts.site
+            ? {
+                ...hosts.site,
+                id: hosts.site._id || hosts.site.id,
+              }
+            : null,
+        }));
+        setHosts(hostsWithId);
+      } catch (error) {
+        console.error("Error fetching hosts:", error);
+        toast.error("Failed to load hosts");
+      }
+    };
+
+    if (token) {
+      fetchSites();
+      fetchHosts();
+    }
+  }, [token, sites.length, hosts.length, setSites, setHosts]);
 
   const metrics = [
-    { label: "Total Sites", value: 20 },
-    { label: "Active Sites", value: 10 },
-    { label: "Inactive Sites", value: 10 },
-  ];
-
-
-  const visitors = [
+    { label: "Total", value: hosts.length },
     {
-      name: "Alice Johnson",
-      phone: 1234567890,
-      checkInTime: "2024-10-01T09:00:00Z",
-      checkOutTime: null,
-      status: "arrived",
+      label: "Active",
+      value: hosts.filter((host) => host.status === "active").length,
     },
     {
-      name: "Bob Smith",
-      phone: 2345678901,
-      checkInTime: "2024-10-01T10:30:00Z",
-      checkOutTime: "2024-10-01T12:00:00Z",
-      status: "departed",
-    },
-    {
-      name: "Charlie Brown",
-      phone: 3456789012,
-      checkInTime: "2024-10-01T11:15:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Diana Prince",
-      phone: 4567890123,
-      checkInTime: "2024-10-01T08:45:00Z",
-      checkOutTime: "2024-10-01T11:30:00Z",
-      status: "departed",
-    },
-    {
-      name: "Ethan Hunt",
-      phone: 5678901234,
-      checkInTime: "2024-10-01T09:30:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Alice Johnson",
-      phone: 1234567890,
-      checkInTime: "2024-10-01T09:00:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Bob Smith",
-      phone: 2345678901,
-      checkInTime: "2024-10-01T10:30:00Z",
-      checkOutTime: "2024-10-01T12:00:00Z",
-      status: "departed",
-    },
-    {
-      name: "Charlie Brown",
-      phone: 3456789012,
-      checkInTime: "2024-10-01T11:15:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Diana Prince",
-      phone: 4567890123,
-      checkInTime: "2024-10-01T08:45:00Z",
-      checkOutTime: "2024-10-01T11:30:00Z",
-      status: "departed",
-    },
-    {
-      name: "Ethan Hunt",
-      phone: 5678901234,
-      checkInTime: "2024-10-01T09:30:00Z",
-      checkOutTime: null,
-      status: "arrived",
+      label: "Inactive",
+      value: hosts.filter((host) => host.status === "inactive").length,
     },
   ];
 
+  const columns = [
+    { header: "Name", key: "name" },
+    //  { header: "ID", key: "idNumber" },
+    //  { header: "Phone", key: "phoneNumber" },
+    {
+      header: "Site",
+      key: "site",
+      render: (row: any) => row.site?.name || "N/A",
+    },
+    { header: "Unit", key: "unit" },
+    {
+      header: "Status",
+      key: "status",
+      render: (row: any) =>
+        row.status == "active" ? (
+          <span className="px-2 py-1 bg-green-200 rounded-md text-green-700 text-sm font-semibold">
+            {row.status.toUpperCase()}
+          </span>
+        ) : (
+          <span className="px-2 py-1 bg-red-200 rounded-md text-red-700 text-sm font-semibold">
+            {row.status.toUpperCase()}
+          </span>
+        ),
+    },
+
+    {
+      header: "Actions",
+      key: "actions",
+      render: (row: any) => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="text-center">
+              <Dialog open={isEditHostOpen} onOpenChange={setIsEditHostOpen}>
+                <DialogTrigger asChild>
+                  <DropdownMenuLabel className="cursor-pointer hover:text-yellow-700/90">
+                    Edit
+                  </DropdownMenuLabel>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogTitle className="text-center">Edit Host</DialogTitle>
+                  <UpdateHostForm
+                    host={row}
+                    onSuccess={() => setIsEditHostOpen(false)}
+                  />
+                  <DialogDescription></DialogDescription>
+                </DialogContent>
+              </Dialog>
+
+              <DropdownMenuSeparator />
+              <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <DialogTrigger asChild>
+                  <DropdownMenuLabel className="cursor-pointer hover:text-red-700">
+                    Delete
+                  </DropdownMenuLabel>
+                </DialogTrigger>
+                <DialogContent className="text-center">
+                  <DialogTitle>Delete Host</DialogTitle>
+                  <DialogDescription className="text-lg">
+                    Are you sure you want to delete this host?
+                  </DialogDescription>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      handleDeleteClick(row.id);
+                    }}
+                    className="w-2/5 mx-auto"
+                  >
+                    {isLoading ? "Deleting..." : "Yes, Delete Host"}
+                  </Button>
+                </DialogContent>
+              </Dialog>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  const handleDeleteClick = async (id: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/hosts/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      if (!response.ok) throw new Error("Failed to delete host.");
+      deleteHost(id); // local store update
+      setIsDeleteOpen(false);
+    } catch (error) {
+      console.error("Error deleting host: ", error);
+    }
+  };
+
+  const [isEditHostOpen, setIsEditHostOpen] = useState(false);
   const [isHostOpen, setIsHostOpen] = useState(false);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
-  // Filter visitors based on filter state
-  const filteredVisitors = visitors.filter((visitor) => {
+  // Filter hosts based on filter state
+  const filteredHosts = hosts.filter((host) => {
     const search = filter.toLowerCase();
     return (
-      visitor.name.toLowerCase().includes(search) ||
-      visitor.phone.toString().includes(search) ||
-      (visitor.status ? visitor.status.toLowerCase().includes(search) : false)
+      host.name.toLowerCase().includes(search) ||
+      host.phoneNumber.toString().includes(search) ||
+      host.idNumber.toString().includes(search) ||
+      host.unit.toString().includes(search) ||
+      (host.status ? host.status.toLowerCase().includes(search) : false)
     );
   });
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredVisitors.length / pageSize) || 1;
-  const paginatedVisitors = filteredVisitors.slice(
+  const totalPages = Math.ceil(filteredHosts.length / pageSize) || 1;
+  const paginatedHosts = filteredHosts.slice(
     (page - 1) * pageSize,
-    page * pageSize
+    page * pageSize,
   );
 
   return (
@@ -180,11 +300,11 @@ const HostStatsCard = () => {
       </div>
         ))} */}
 
-      {/* TABULATED LIST OF SITES */}
+      {/* TABULATED LIST OF HOSTS */}
       <div className="mt-8 h-3/4">
         <div className="flex items-center justify-between py-4">
           <Input
-            placeholder="Search sites..."
+            placeholder="Search hosts..."
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
             className="max-w-sm"
@@ -192,97 +312,22 @@ const HostStatsCard = () => {
           {/* NEW HOST BUTTON AND DIALOG */}
           <Dialog open={isHostOpen} onOpenChange={setIsHostOpen}>
             <DialogTrigger asChild>
-              <Button className={`${roleColors[user?.role as keyof typeof roleColors] } cursor-pointer`}>
-                <PlusCircle /> Create New Host
+              <Button
+                className={`${roleColors[user?.role as keyof typeof roleColors]} cursor-pointer`}
+              >
+                <PlusCircle />
+                <p className="max-lg:hidden">Create New Host</p>
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogTitle className="text-center">
-                Create New Host
-              </DialogTitle>
+              <DialogTitle className="text-center">Create New Host</DialogTitle>
               <NewHostForm onSuccess={() => setIsHostOpen(false)} />
               <DialogDescription></DialogDescription>
             </DialogContent>
           </Dialog>
         </div>
         <div className="overflow-hidden rounded-lg border max-w-6xl p-3 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check-In Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check-Out Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedVisitors.length ? (
-                paginatedVisitors.map((visitor, idx) => (
-                  <tr key={idx}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.phone}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.checkInTime
-                        ? new Date(visitor.checkInTime).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.checkOutTime
-                        ? new Date(visitor.checkOutTime).toLocaleTimeString(
-                            [],
-                            { hour: "2-digit", minute: "2-digit" }
-                          )
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.status}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuLabel>Edit</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Delete</DropdownMenuLabel>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="h-24 text-center">
-                    No results.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <Table columns={columns} data={paginatedHosts} />
           <div className="flex items-center justify-end space-x-2 py-4">
             <Button
               variant="outline"
@@ -314,4 +359,4 @@ const HostStatsCard = () => {
   );
 };
 
-export default  HostStatsCard;
+export default HostStatsCard;
