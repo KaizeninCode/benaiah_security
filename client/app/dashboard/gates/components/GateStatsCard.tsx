@@ -65,9 +65,7 @@ const GateStatsCard = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [shouldRefetch, setShouldRefetch] = useState(0);
 
-  // DEBUG LOGS
-  console.log("Gates in table component:", gates);
-  console.log("Gates length:", gates.length);
+  
 
   // Fetch sites and guards when component mounts
   useEffect(() => {
@@ -172,13 +170,13 @@ const GateStatsCard = () => {
   }, [token, setGates]);
 
   const metrics = [
-    { label: "Total Gates", value: gates.length },
+    { label: "Total", value: gates.length },
     {
-      label: "Active Gates",
+      label: "Active",
       value: gates.filter((gate) => gate.status === "active").length,
     },
     {
-      label: "Inactive Gates",
+      label: "Inactive",
       value: gates.filter((gate) => gate.status === "inactive").length,
     },
   ];
@@ -337,7 +335,7 @@ const GateStatsCard = () => {
 
       {/* TABULATED LIST OF GATES */}
       <div className="mt-8 h-3/4">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-4 max-lg:gap-8">
           <Input
             placeholder="Search gates..."
             value={filter}

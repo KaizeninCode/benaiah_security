@@ -76,13 +76,13 @@ const SiteStatsCard = () => {
   }, [token, setSites]);
 
   const metrics = [
-    { label: "Total Sites", value: sites.length },
+    { label: "Total", value: sites.length },
     {
-      label: "Active Sites",
+      label: "Active",
       value: sites.filter((site) => site.status === "active").length,
     },
     {
-      label: "Inactive Sites",
+      label: "Inactive",
       value: sites.filter((site) => site.status === "inactive").length,
     },
   ];
@@ -256,7 +256,7 @@ const SiteStatsCard = () => {
 
       {/* TABULATED LIST OF SITES */}
       <div className="mt-8 h-3/4">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-4 max-lg:gap-8">
           <Input
             placeholder="Search sites..."
             value={filter}

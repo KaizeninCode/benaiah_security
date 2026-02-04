@@ -124,13 +124,13 @@ const GuardStatsCard = () => {
   }, [token, sites.length, setSites, guards.length, setGuards]);
 
   const metrics = [
-    { label: "Total Guards", value: guards.length },
+    { label: "Total", value: guards.length },
     {
-      label: "Active Guards",
+      label: "Active",
       value: guards.filter((guard) => guard.status === "active").length,
     },
     {
-      label: "Inactive Guards",
+      label: "Inactive",
       value: guards.filter((guard) => guard.status === "inactive").length,
     },
   ];
@@ -294,7 +294,7 @@ const GuardStatsCard = () => {
 
       {/* TABULATED LIST OF GUARDS */}
       <div className="mt-8 h-3/4">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-4 max-lg:gap-8">
           <Input
             placeholder="Search guards..."
             value={filter}
