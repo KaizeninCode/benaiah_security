@@ -10,7 +10,7 @@ const guardSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: "active",
+      default: "inactive",
     },
       hireDate: { type: Date, default: Date.now },
     // photoUrl: { type: String },

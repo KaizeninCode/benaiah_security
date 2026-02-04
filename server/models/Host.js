@@ -11,7 +11,7 @@ const hostSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: "active",
+      default: "inactive",
     },
       movedIn: { type: Date, default: Date.now },
   },
