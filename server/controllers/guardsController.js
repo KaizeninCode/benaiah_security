@@ -1,17 +1,16 @@
 import Guard from "../models/Guard.js";
 import Gate from "../models/Gate.js";
 import Visitor from "../models/Visitor.js";
+import Site from "../models/Site.js";
 import GuardAssignment from "../models/GuardAssignment.js";
 
 // 1. Create a new guard
 export const createGuard = async (req, res) => {
   const { name, idNumber, phoneNumber, email } = req.body;
   if (!name || !idNumber || !phoneNumber || !email)
-    return res
-      .status(400)
-      .json({
-        message: "Name, ID number, phone number, and email are required.",
-      });
+    return res.status(400).json({
+      message: "Name, ID number, phone number, and email are required.",
+    });
   try {
     const newGuard = new Guard({ name, idNumber, phoneNumber, email });
     await newGuard.save();
@@ -50,21 +49,38 @@ export const getOneGuard = async (req, res) => {
 
 // 4. Update guard
 export const updateGuard = async (req, res) => {
-  const { id } = req.params;
   try {
-    const guard = await Guard.findById(id).exec();
-    if (!guard) return res.status(404).json({ message: "Guard not found." });
-    // update fields
-    for (const key in req.body) {
-      if (key !== "id" && req.body[key] !== undefined) {
-        guard[key] = req.body[key];
-      }
+    const { id } = req.params;
+    const oldGuard = await Guard.findById(id).exec();
+    if (!oldGuard) return res.status(404).json({ message: "Guard not found." });
+
+    // if site is being updated/changed, handle assignment logic
+    if (
+      req.body.assignedSite &&
+      req.body.assignedSite !== oldGuard.assignedSite.toString()
+    ) {
+      // remove from old site
+      await Site.findByIdAndUpdate(oldGuard.assignedSite, {
+        $pull: { guards: oldGuard._id },
+      });
+      // add to new site
+      await Site.findByIdAndUpdate(req.bodyassignedSite, {
+        $push: { guards: oldGuard._id },
+      });
     }
-    await guard.save();
-    res.status(200).json({ message: "Guard updated successfully.", guard });
+
+    const updatedGuard = await Guard.findByIdAndUpdate(id, req.body, {
+      new: true,
+    }).populate("site");
+
+    res
+      .status(200)
+      .json({ message: "Guard updated successfully.", guard: updatedGuard });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Error updating guard." });
+    res
+      .status(500)
+      .json({ message: "Error updating guard.", error: error.message });
   }
 };
 
@@ -74,11 +90,14 @@ export const deleteGuard = async (req, res) => {
   try {
     const guard = await Guard.findById(id).exec();
     if (!guard) return res.status(404).json({ message: "Guard not found." });
-    await Guard.deleteOne({ _id: id });
+    // remove guard from assigned site's guards array
+    await Site.findByIdAndUpdate(guard.assignedSite, {$pull: {guards: guard._id}})
+    // delete guard
+    await Guard.findByIdAndDelete(id);
     res.status(200).json({ message: "Guard deleted successfully." });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Error deleting guard." });
+    res.status(500).json({ message: "Error deleting guard.", error: error.message });
   }
 };
 
@@ -163,7 +182,7 @@ export const exportGuardLogs = async (req, res) => {
       res.setHeader("Content-Type", "text/csv");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="guard_${id}_logs.csv"`
+        `attachment; filename="guard_${id}_logs.csv"`,
       );
       return res.status(200).send(csv);
     } else if (format === "pdf") {
@@ -176,7 +195,7 @@ export const exportGuardLogs = async (req, res) => {
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
           "Content-Disposition",
-          `attachment; filename="guard_${id}_logs.pdf"`
+          `attachment; filename="guard_${id}_logs.pdf"`,
         );
         res.status(200).send(pdfData);
       });

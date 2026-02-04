@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,37 +10,41 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDashboardStore } from "@/store/useDashboardStore";
+import { toast } from "sonner";
 
 type NewGuardFormProps = {
   onSuccess?: () => void;
 };
 
-export default function NewGuardForm({onSuccess} : NewGuardFormProps) {
+export default function NewGuardForm({ onSuccess }: NewGuardFormProps) {
   const setUser = useDashboardStore((state) => state.setUser);
   const token = useDashboardStore((state) => state.token);
+  const addGuard = useDashboardStore((state) => state.addGuard);
+  const setSites = useDashboardStore((state) => state.setSites);
   const router = useRouter();
+  const [idNumber, setIdNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
- const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     // Basic validation
-    if (!email || !phone || !username || !password) {
+    if (!email || !phoneNumber || !name || !idNumber) {
       setError("All fields are required.");
+      setIsLoading(false);
       return;
     }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/auth/admin/register`,
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards`,
         {
           method: "POST",
           headers: {
@@ -49,35 +53,45 @@ export default function NewGuardForm({onSuccess} : NewGuardFormProps) {
           },
           body: JSON.stringify({
             email,
-            phone: Number(phone),
-            username,
-            password,
-            role: "guard",
+            phoneNumber: Number(phoneNumber),
+            idNumber: Number(idNumber),
+            name,
+            status,
           }),
-        }
+        },
       );
       if (!response.ok) {
         const data = await response.json();
         setError(data.message || "Failed to create guard.");
         return;
       }
+      const responseData = await response.json();
+
+      const guardWithId = {
+        ...responseData.guard,
+        id: responseData.guard._id,
+      };
+
+      addGuard(guardWithId); // This updates the store
+      toast.success("Guard created successfully!");
       onSuccess && onSuccess();
       // Optionally reset form or close dialog here
-      
+
       setEmail("");
-      setPhone("");
-      setUsername("");
-      setPassword("");
+      setPhoneNumber("");
+      setIdNumber("");
+      setName("");
       setError("");
       // Optionally, show a success message or refresh the list
     } catch (err) {
       setError("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Card className="w-4/5 m-auto max-md:my-10 h-fit">
-     
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
@@ -86,14 +100,14 @@ export default function NewGuardForm({onSuccess} : NewGuardFormProps) {
             </Alert>
           )}
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="Name">Name</Label>
             <Input
-              id="username"
+              id="name"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
-              placeholder="Username"
+              placeholder="Name"
             />
           </div>
           <div className="space-y-2">
@@ -108,35 +122,35 @@ export default function NewGuardForm({onSuccess} : NewGuardFormProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">Phone Number</Label>
             <Input
               id="phone"
               type="text"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               required
               placeholder="Phone number"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="idNumber">ID Number</Label>
             <Input
-              id="password"
+              id="idNumber"
               type="text"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={idNumber}
+              onChange={(e) => setIdNumber(e.target.value)}
               required
-              placeholder="Password"
+              placeholder="ID Number"
             />
           </div>
-          
-          
+
           <div className="w-2/5 mx-auto">
             <Button
+              disabled={isLoading}
               type="submit"
               className=" bg-red-500 w-full hover:bg-red-800 cursor-pointer"
             >
-              Create Guard
+              {isLoading ? "Creating guard..." : "Create Guard"}
             </Button>
           </div>
         </form>

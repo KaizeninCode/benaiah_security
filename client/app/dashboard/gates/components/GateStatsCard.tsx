@@ -40,6 +40,7 @@ import {
 import NewGateForm from "./NewGateForm";
 import { Table } from "../../components/Table";
 import UpdateGateForm from "./UpdateGateForm";
+import { toast } from "sonner";
 // import NewVisitorForm from "./NewVisitorForm";
 // import { useEffect, useState } from "react";
 
@@ -54,6 +55,9 @@ const GateStatsCard = () => {
   const gates = useDashboardStore((state) => state.gates);
   const setGates = useDashboardStore((state) => state.setGates);
   const deleteGate = useDashboardStore((state) => state.deleteGate);
+  const guards = useDashboardStore((state) => state.guards);
+  const setGuards = useDashboardStore((state) => state.setGuards);
+  const deleteGuard = useDashboardStore((state) => state.deleteGuard);
   const sites = useDashboardStore((state) => state.sites);
   const setSites = useDashboardStore((state) => state.setSites);
 
@@ -61,11 +65,15 @@ const GateStatsCard = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [shouldRefetch, setShouldRefetch] = useState(0);
 
-  // Fetch sites when component mounts
+  // DEBUG LOGS
+  console.log("Gates in table component:", gates);
+  console.log("Gates length:", gates.length);
+
+  // Fetch sites and guards when component mounts
   useEffect(() => {
     const fetchSites = async () => {
       if (sites.length > 0) return; // Don't fetch if already loaded
-      
+
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/sites`,
@@ -74,11 +82,11 @@ const GateStatsCard = () => {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
-        
+
         if (!response.ok) throw new Error("Failed to fetch sites");
-        
+
         const data = await response.json();
         const sitesWithId = data.sites.map((site: any) => ({
           ...site,
@@ -87,12 +95,43 @@ const GateStatsCard = () => {
         setSites(sitesWithId);
       } catch (error) {
         console.error("Error fetching sites:", error);
+        toast.error("Failed to load sites");
       }
     };
 
-    if (token) fetchSites();
-  }, [token, sites.length, setSites]);
+    const fetchGuards = async () => {
+      if (guards.length > 0) return; // Don't fetch if already loaded
 
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch guards");
+
+        const data = await response.json();
+        const guardsWithId = data.guards.map((guards: any) => ({
+          ...guards,
+          id: guards._id,
+        }));
+        setGuards(guardsWithId);
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+        toast.error("Failed to load sites");
+      }
+    };
+
+    if (token) {
+      fetchSites();
+      fetchGuards();
+    }
+  }, [token, sites.length, guards.length, setSites, setGuards]);
 
   useEffect(() => {
     const fetchGates = async () => {
@@ -320,7 +359,6 @@ const GateStatsCard = () => {
               <NewGateForm
                 onSuccess={() => {
                   setIsGateOpen(false);
-                  setShouldRefetch((prev) => prev + 1);
                 }}
               />
               <DialogDescription></DialogDescription>

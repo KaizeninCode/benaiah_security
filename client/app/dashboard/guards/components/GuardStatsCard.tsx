@@ -17,8 +17,6 @@ import {
   getFilteredRowModel,
 } from "@tanstack/react-table";
 
-import { Table } from "@chakra-ui/react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,7 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { MoreHorizontal, ArrowUpDown, PlusCircle } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -40,6 +38,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import NewGuardForm from "./NewGuardForm";
+import { Table } from "../../components/Table";
+import UpdateGuardForm from "./UpdateGuardForm";
 // import NewVisitorForm from "./NewVisitorForm";
 // import { useEffect, useState } from "react";
 
@@ -50,108 +50,218 @@ type GuardMetricsProps = {
 // const GuardMetrics = ({ stats }: GuardMetricsProps) => {
 const GuardStatsCard = () => {
   const user = useDashboardStore((state) => state.user);
-  
+  const token = useDashboardStore((state) => state.token);
+  const guards = useDashboardStore((state) => state.guards);
+  const setGuards = useDashboardStore((state) => state.setGuards);
+  const deleteGuard = useDashboardStore((state) => state.deleteGuard);
+  const sites = useDashboardStore((state) => state.sites);
+  const setSites = useDashboardStore((state) => state.setSites);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGuardOpen, setIsGuardOpen] = useState(false);
+  const [isEditGuardOpen, setIsEditGuardOpen] = useState(false);
+  const [isDeleteGuardOpen, setIsDeleteGuardOpen] = useState(false);
+
+  // Fetch sites and guards when component mounts
+  useEffect(() => {
+    const fetchSites = async () => {
+      if (sites.length > 0) return; // Don't fetch if already loaded
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/sites`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch sites");
+
+        const data = await response.json();
+        const sitesWithId = data.sites.map((site: any) => ({
+          ...site,
+          id: site._id,
+        }));
+        setSites(sitesWithId);
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+      }
+    };
+    const fetchGuards = async () => {
+      if (guards.length > 0) return; // Don't fetch if already loaded
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch guards");
+
+        const data = await response.json();
+        const guardsWithId = data.guards.map((guard: any) => ({
+          ...guard,
+          id: guard._id,
+        }));
+        setGuards(guardsWithId);
+      } catch (error) {
+        console.error("Error fetching guards:", error);
+      }
+    };
+
+    if (token) {
+      fetchSites();
+      fetchGuards();
+    }
+  }, [token, sites.length, setSites, guards.length, setGuards]);
 
   const metrics = [
-    { label: "Total Guards", value: 200 },
-    { label: "Active Guards", value: 144 },
-    { label: "Inactive Guards", value: 56 },
-  ];
-
-
-  const visitors = [
+    { label: "Total Guards", value: guards.length },
     {
-      name: "Alice Johnson",
-      phone: 1234567890,
-      checkInTime: "2024-10-01T09:00:00Z",
-      checkOutTime: null,
-      status: "arrived",
+      label: "Active Guards",
+      value: guards.filter((guard) => guard.status === "active").length,
     },
     {
-      name: "Bob Smith",
-      phone: 2345678901,
-      checkInTime: "2024-10-01T10:30:00Z",
-      checkOutTime: "2024-10-01T12:00:00Z",
-      status: "departed",
-    },
-    {
-      name: "Charlie Brown",
-      phone: 3456789012,
-      checkInTime: "2024-10-01T11:15:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Diana Prince",
-      phone: 4567890123,
-      checkInTime: "2024-10-01T08:45:00Z",
-      checkOutTime: "2024-10-01T11:30:00Z",
-      status: "departed",
-    },
-    {
-      name: "Ethan Hunt",
-      phone: 5678901234,
-      checkInTime: "2024-10-01T09:30:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Facundo Pellistri",
-      phone: 6789012345,
-      checkInTime: "2024-10-01T09:00:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "John Jones",
-      phone: 7890123456,
-      checkInTime: "2024-10-01T10:30:00Z",
-      checkOutTime: "2024-10-01T12:00:00Z",
-      status: "departed",
-    },
-    {
-      name: "Gus Fring",
-      phone: 8901234567,
-      checkInTime: "2024-10-01T11:15:00Z",
-      checkOutTime: null,
-      status: "arrived",
-    },
-    {
-      name: "Hannibal Bates",
-      phone: 9012345678,
-      checkInTime: "2024-10-01T08:45:00Z",
-      checkOutTime: "2024-10-01T11:30:00Z",
-      status: "departed",
-    },
-    {
-      name: "Inez Gonzalez",
-      phone: 1123456789,
-      checkInTime: "2024-10-01T09:30:00Z",
-      checkOutTime: null,
-      status: "arrived",
+      label: "Inactive Guards",
+      value: guards.filter((guard) => guard.status === "inactive").length,
     },
   ];
 
-  const [isGuardOpen, setIsGuardOpen] = useState(false);
+  const columns = [
+    { header: "Name", key: "name" },
+    { header: "ID Number", key: "idNumber" },
+    { header: "Phone Number", key: "phoneNumber" },
+    // {
+    //   header: "Site",
+    //   key: "site",
+    //   render: (row: any) => row.site?.name || "N/A",
+    // },
+    {
+      header: "Status",
+      key: "status",
+      render: (row: any) =>
+        row.status == "active" ? (
+          <span className="px-2 py-1 bg-green-200 rounded-md text-green-700 text-sm font-semibold">
+            {row.status.toUpperCase()}
+          </span>
+        ) : (
+          <span className="px-2 py-1 bg-red-200 rounded-md text-red-700 text-sm font-semibold">
+            {row.status.toUpperCase()}
+          </span>
+        ),
+    },
+
+    {
+      header: "Actions",
+      key: "actions",
+      render: (row: any) => {
+        //  console.log("Row data:", row);
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="text-center">
+              <Dialog open={isEditGuardOpen} onOpenChange={setIsEditGuardOpen}>
+                <DialogTrigger asChild>
+                  <DropdownMenuLabel className="cursor-pointer hover:text-yellow-700/90">
+                    Edit
+                  </DropdownMenuLabel>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogTitle className="text-center">Edit Guard</DialogTitle>
+                  <UpdateGuardForm
+                    guard={row}
+                    onSuccess={() => setIsEditGuardOpen(false)}
+                  />
+                  <DialogDescription></DialogDescription>
+                </DialogContent>
+              </Dialog>
+
+              <DropdownMenuSeparator />
+              <Dialog
+                open={isDeleteGuardOpen}
+                onOpenChange={setIsDeleteGuardOpen}
+              >
+                <DialogTrigger asChild>
+                  <DropdownMenuLabel className="cursor-pointer hover:text-red-700">
+                    Delete
+                  </DropdownMenuLabel>
+                </DialogTrigger>
+                <DialogContent className="text-center">
+                  <DialogTitle>Delete Guard</DialogTitle>
+                  <DialogDescription className="text-lg">
+                    Are you sure you want to delete this guard?
+                  </DialogDescription>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      handleDeleteClick(row.id);
+                    }}
+                    className="w-2/5 mx-auto"
+                  >
+                    Yes. Delete guard
+                  </Button>
+                </DialogContent>
+              </Dialog>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  const handleDeleteClick = async (id: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      if (!response.ok) throw new Error("Failed to delete guard.");
+      deleteGuard(id); // local store update
+      setIsDeleteGuardOpen(false);
+    } catch (error) {
+      console.error("Error deleting guard: ", error);
+    }
+  };
+
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
   // Filter visitors based on filter state
-  const filteredVisitors = visitors.filter((visitor) => {
+  const filteredGuards = guards.filter((guard) => {
     const search = filter.toLowerCase();
     return (
-      visitor.name.toLowerCase().includes(search) ||
-      visitor.phone.toString().includes(search) ||
-      (visitor.status ? visitor.status.toLowerCase().includes(search) : false)
+      guard.name.toLowerCase().includes(search) ||
+      guard.phoneNumber ||
+      guard.idNumber ||
+      guard.email.toLowerCase().includes(search) ||
+      (guard.status ? guard.status.toLowerCase().includes(search) : false)
     );
   });
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredVisitors.length / pageSize) || 1;
-  const paginatedVisitors = filteredVisitors.slice(
+  const totalPages = Math.ceil(filteredGuards.length / pageSize) || 1;
+  const paginatedGuards = filteredGuards.slice(
     (page - 1) * pageSize,
-    page * pageSize
+    page * pageSize,
   );
 
   return (
@@ -182,109 +292,40 @@ const GuardStatsCard = () => {
       </div>
         ))} */}
 
-      {/* TABULATED LIST OF SITES */}
+      {/* TABULATED LIST OF GUARDS */}
       <div className="mt-8 h-3/4">
         <div className="flex items-center justify-between py-4">
           <Input
-            placeholder="Search sites..."
+            placeholder="Search guards..."
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
             className="max-w-sm"
           />
-          {/* NEW SITE BUTTON AND DIALOG */}
+          {/* NEW GUARD BUTTON AND DIALOG */}
           <Dialog open={isGuardOpen} onOpenChange={setIsGuardOpen}>
             <DialogTrigger asChild>
-              <Button className={`${roleColors[user?.role as keyof typeof roleColors] } cursor-pointer`}>
-                <PlusCircle /> <p className="max-md:hidden">Create New Guard</p>
+              <Button
+                className={`${roleColors[user?.role as keyof typeof roleColors]} cursor-pointer`}
+              >
+                <PlusCircle />
+                <p className="max-lg:hidden">Create New Guard</p>
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogTitle className="text-center">
                 Create New Guard
               </DialogTitle>
-              <NewGuardForm onSuccess={() => setIsGuardOpen(false)} />
+              <NewGuardForm
+                onSuccess={() => {
+                  setIsGuardOpen(false);
+                }}
+              />
               <DialogDescription></DialogDescription>
             </DialogContent>
           </Dialog>
         </div>
         <div className="overflow-hidden rounded-lg border max-w-6xl p-3 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check-In Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check-Out Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedVisitors.length ? (
-                paginatedVisitors.map((visitor, idx) => (
-                  <tr key={idx}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.phone}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.checkInTime
-                        ? new Date(visitor.checkInTime).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.checkOutTime
-                        ? new Date(visitor.checkOutTime).toLocaleTimeString(
-                            [],
-                            { hour: "2-digit", minute: "2-digit" }
-                          )
-                        : "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {visitor.status}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuLabel>Edit</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Delete</DropdownMenuLabel>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="h-24 text-center">
-                    No results.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <Table columns={columns} data={paginatedGuards} />
           <div className="flex items-center justify-end space-x-2 py-4">
             <Button
               variant="outline"
@@ -316,4 +357,4 @@ const GuardStatsCard = () => {
   );
 };
 
-export default  GuardStatsCard;
+export default GuardStatsCard;

@@ -54,70 +54,6 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch sites and guards when component mounts
-  useEffect(() => {
-    const fetchSites = async () => {
-      if (sites.length > 0) return; // Don't fetch if already loaded
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/sites`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch sites");
-
-        const data = await response.json();
-        const sitesWithId = data.sites.map((site: any) => ({
-          ...site,
-          id: site._id,
-        }));
-        setSites(sitesWithId);
-      } catch (error) {
-        console.error("Error fetching sites:", error);
-        toast.error("Failed to load sites");
-      }
-    };
-
-    const fetchGuards = async () => {
-      if (guards.length > 0) return; // Don't fetch if already loaded
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_LIVE_BACKEND_URL}/guards`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch guards");
-
-        const data = await response.json();
-        const guardsWithId = data.guards.map((guards: any) => ({
-          ...guards,
-          id: guards._id,
-        }));
-        setGuards(guardsWithId);
-      } catch (error) {
-        console.error("Error fetching sites:", error);
-        toast.error("Failed to load sites");
-      }
-    };
-
-    if (token) {
-      fetchSites();
-      fetchGuards();
-    }
-  }, [token, sites.length, guards.length, setSites, setGuards]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -157,11 +93,16 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
       }
 
       const responseData = await response.json();
+      console.log("Gate created - backend response:", responseData); // DEBUG
       // Map _id to id for consistency
       const gateWithId = {
         ...responseData.gate,
         id: responseData.gate._id,
       };
+
+      // DEBUG CONSOLE LOGS
+      console.log("Gate with mapped ID:", gateWithId);
+      console.log("Calling addGate with:", gateWithId);
 
       addGate(gateWithId); // Add gate with the MongoDB-generated ID
       toast.success("Gate created successfully!");
@@ -219,7 +160,7 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="name">Gate Name</Label>
             <Input
@@ -231,8 +172,6 @@ export default function NewGateForm({ onSuccess }: NewGateFormProps) {
               placeholder="Main Gate"
             />
           </div>
-
-          
 
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>

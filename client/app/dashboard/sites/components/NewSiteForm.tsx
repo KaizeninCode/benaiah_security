@@ -25,18 +25,18 @@ type NewSiteFormProps = {
 export default function NewSiteForm({ onSuccess }: NewSiteFormProps) {
   const user = useDashboardStore((state) => state.user);
   const token = useDashboardStore((state) => state.token);
+  const addSite = useDashboardStore((state) => state.addSite);
   const router = useRouter();
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [purpose, setPurpose] = useState("");
-  const [host, setHost] = useState("");
-  const [site, setSite] = useState("");
+  
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true)
 
     // Basic validation
     if (!name || !location) {
@@ -65,6 +65,15 @@ export default function NewSiteForm({ onSuccess }: NewSiteFormProps) {
         toast.error(data.message || "Failed to create site.");
         return;
       }
+
+      const responseData = await response.json();
+
+      const siteWithId = {
+        ...responseData.site,
+        id: responseData.site._id,
+      };
+
+      addSite(siteWithId); // This updates the store
       toast.success("Site created successfully!");
       onSuccess && onSuccess();
       // Optionally reset form or close dialog here
@@ -75,6 +84,8 @@ export default function NewSiteForm({ onSuccess }: NewSiteFormProps) {
       // Optionally, show a success message or refresh the list
     } catch (err) {
       setError("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -114,9 +125,10 @@ export default function NewSiteForm({ onSuccess }: NewSiteFormProps) {
           <div className="w-2/5 mx-auto">
             <Button
               type="submit"
+              disabled={isLoading}
               className={`${roleColors[user?.role as keyof typeof roleColors]} w-full cursor-pointer`}
             >
-              Create Site
+              {isLoading ? 'Creating site...' : 'Create Site'}
             </Button>
           </div>
         </form>
